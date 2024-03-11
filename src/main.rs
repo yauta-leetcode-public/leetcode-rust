@@ -10,8 +10,31 @@ impl Solution {
     }
 }
 
+fn data_types() {
+    let guess:f64 = "43".parse().expect("not a mumber!");
+    println!("guess is: {guess}");
+    let heart = '😻';
+    println!("heart is: {heart}");
+    let tup: (i32, i64, f64) = (1,2,3.0);
+    println!("tup is: {:?}", tup);
+}
+
 
 fn main() {
     println!("Hello, world!");
     println!("{:?}", Solution::combine(10, 5));
+
+    let x = 5;
+    println!("the value of x is: {x}");
+    let x = 6;
+    println!("the value of x is: {x}");
+    let x = 7;
+    println!("the value of x is: {x}");
+    {
+        let x = x*2;
+        println!("inside the value of x is: {x}");
+    }
+    println!("outsize the value of x is: {x}");
+
+    data_types();
 }
