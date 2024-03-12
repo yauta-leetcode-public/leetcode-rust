@@ -1,17 +1,10 @@
-use core::fmt;
+use core::{fmt, num};
 use std::{io, mem};
 
 struct Solution{
 
 }
 
-impl Solution {
-    pub fn combine(n: i32, k: i32) -> Vec<Vec<i32>> {
-        let mut result = Vec::new();
-        result.push(Vec::from_iter([1,2,3, 4]));
-        result
-    }
-}
 
 fn data_types() {
     let guess:f64 = "43".parse().expect("not a mumber!");
@@ -141,23 +134,109 @@ fn primitives() {
     println!("{} transpose: {}", m, transpose(&m));
     println!("{} transpose: {}", m, transpose(&m));
 
-    fn analyze_slice(slice: &[i32]) -> (i32, usize) {
+    fn analyze_slice<T:fmt::Display>(slice: &[T]) -> (i32, usize) {
         println!("the first element is: {}", slice[0]);
         println!("the length is: {}", slice.len());
         println!("array occupies {} bytes", mem::size_of_val(slice));
-        (slice[0], slice.len())
+        (format!("{}", slice[0]).parse().expect("error!"), slice.len())
     }
 
     println!("analyze slice: {:?}", analyze_slice(&[1,2,3]));
-    let mut array =[1i32;16];
+    let mut array =[1i16;16];
     for i in [12,2,3,4] {
         //let i:i32 = i;
-        array[i] = (i+1) as i32;
+        array[i] = (i+1) as i16;
     }
     println!("analyze slice: {:?}", analyze_slice(&array[1 .. 10]));
 
 }
 
+impl Solution {
+    pub fn combine(n: i32, k: i32) -> Vec<Vec<i32>> {
+        let mut result = Vec::new();
+        for i in 0..k {
+            //println!("i is {i}");
+            if i == 0 {
+                for j in 1..(n+1) {
+                    let item = Vec::from_iter([j]);
+                    result.push(item);
+                }
+            }else{
+                let mut new_result = Vec::new();
+                for j in 1..(n+1) {
+                    for item in &result {
+                        if item[item.len()-1] < j {
+                            let mut p = item.clone();
+                            p.push(j);
+                            new_result.push(p);
+                        }
+                    }
+                }
+                result = new_result;
+            }
+        }
+        result
+
+    }
+}
+
+fn test_77() {
+    println!("{:?}",Solution::combine(4, 2));
+    println!("{:?}",Solution::combine(1, 1));
+    println!("{:?}",Solution::combine(20, 15));
+}
+
+fn test_78() {
+    impl Solution {
+        pub fn subsets(nums: Vec<i32>) -> Vec<Vec<i32>> {
+            let mut nums = nums.clone();
+            let mut result = Vec::new();
+            let mut buffer: Vec<Vec<i32>> = Vec::new();
+            result.push(Vec::new());
+            buffer.push(Vec::new());
+            nums.sort();
+            for i in 0..nums.len() {
+                let mut new_buffer: Vec<Vec<i32>> = Vec::new();
+                for item in &buffer {
+                    for num in &nums {
+                        if item.is_empty() {
+                            new_buffer.push(Vec::from_iter([*num]));
+                        }else if item[item.len()-1] < *num{
+                            let mut p = item.clone();
+                            p.push(*num);
+                            new_buffer.push(p);
+                        }
+                    }
+                }
+                buffer = new_buffer.clone();
+                result.append(&mut new_buffer);
+            }
+            result
+        }
+    }
+    println!("{:?}", Solution::subsets(Vec::from_iter([1,2,3])));
+    println!("{:?}", Solution::subsets(Vec::from_iter(1..11)));
+}
+
+fn custom_types() {
+
+    #[derive(Debug)]
+    struct Person {
+        name: String,
+        age: u8,
+    }
+
+    #[derive(Debug)]
+    struct Point(i32, i32);
+
+    #[derive(Debug)]
+    struct Rectangle {
+        center: Point,
+        user: Person,
+    }
+
+    println!("{:?}", Rectangle{center: Point(1,2), user: Person{name:String::from("ab"), age:35}})
+}
 
 fn main() {
     /* 
@@ -178,5 +257,8 @@ fn main() {
     */
     //data_types();
     //formatted_print();
-    primitives();
+    //primitives();
+    //test_77();
+    //test_78();
+    custom_types();
 }
