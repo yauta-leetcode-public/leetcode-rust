@@ -17,6 +17,12 @@ fn data_types() {
     println!("heart is: {heart}");
     let tup: (i32, i64, f64) = (1,2,3.0);
     println!("tup is: {:?}", tup);
+    let (a, b, _) = tup;
+    println!("a is {a}, b is {b}, c is {}", b);
+    let arr: [i64;5] = [3;5];
+    println!("array is: {:?}", arr);
+    let arr = [3;5];
+    println!("array is: {:?}", arr);
 }
 
 
