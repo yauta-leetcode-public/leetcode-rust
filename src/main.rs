@@ -149,6 +149,12 @@ fn primitives() {
     }
 
     println!("analyze slice: {:?}", analyze_slice(&[1,2,3]));
+    let mut array =[1i32;16];
+    for i in [12,2,3,4] {
+        //let i:i32 = i;
+        array[i] = (i+1) as i32;
+    }
+    println!("analyze slice: {:?}", analyze_slice(&array[1 .. 10]));
 
 }
 
