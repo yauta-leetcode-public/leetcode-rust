@@ -1,5 +1,5 @@
-use core::{fmt, num};
-use std::{io, mem};
+use core::fmt;
+use std::{collections::{HashMap, HashSet}, io, mem, ops::Add};
 
 struct Solution{
 
@@ -238,6 +238,173 @@ fn custom_types() {
     println!("{:?}", Rectangle{center: Point(1,2), user: Person{name:String::from("ab"), age:35}})
 }
 
+fn leetcode_79(){
+
+    impl Solution {
+        pub fn exist(board: Vec<Vec<char>>, word: String) -> bool {
+
+            struct Point(i16, i16);
+
+            // Implement From function for Point with i32 as parameter
+            impl From<i32> for Point {
+                fn from(item: i32) -> Self {
+                    Point((item/10000) as i16, (item%10000) as i16)
+                }
+            }
+
+            //Implement Into function for Point with i32 as parameter
+            impl Into<i32> for Point {
+                fn into(self) -> i32 {
+                    (self.0 as i32)*10000 + self.1 as i32
+                }
+            }
+
+            //Implement Add function for two points
+            impl Add for Point {
+                type Output = Point;
+
+                fn add(self, other: Point) -> Point {
+                    Point(self.0 + other.0, self.1 + other.1)
+                }
+            }
+
+            //Implement clone function for struct Point
+            impl Clone for Point {
+                fn clone(&self) -> Point {
+                    Point(self.0, self.1)
+                }
+            }
+
+            // Implement a struct: Trie Tree
+            // Implement a function: insert(word)
+            struct TrieTree {
+                position: Point,
+                children: Option<HashMap<char, TrieTree>>,
+            }
+
+            //Implement new function for TrieTree
+            impl TrieTree {
+                fn new() -> Self {
+                    TrieTree {
+                        position: Point(0, 0),
+                        children: None,
+                    }
+                }
+
+                //Implement insert function for TrieTree, with char as parameter, and return the child trietree node as return value
+                fn insert(&mut self, word: char) -> &mut TrieTree {
+                    if self.children.is_none() {
+                        self.children = Some(HashMap::new());
+                    }
+                    self.children.as_mut().unwrap().entry(word).or_insert(TrieTree::new())
+                }
+
+                //Get the corresponding TrieTree child node for given parameter: word as char, return the child node as mutable reference
+                fn get_child(&mut self, word: char) -> Option<&mut TrieTree> {
+                    if self.children.is_none() {
+                        return None;
+                    }
+                    self.children.as_mut().unwrap().get_mut(&word)
+                }
+            }
+
+            fn iter_node(node: &mut TrieTree, board: &Vec<Vec<char>>, pos: Point, path: &mut HashSet<i32>) {
+                let offsets = [Point(-1, 0), Point(1, 0), Point(0, -1), Point(0, 1)];
+                for offset in offsets {
+                    let new_point = offset + pos.clone();
+                    let (x, y) = (new_point.0, new_point.1);
+                    if x >= 0 && x < board.len() as i16 && y >= 0 && y < board[0].len() as i16 {
+                        let new_pos = new_point.into();
+                        if !path.contains(&new_pos) {
+                            path.insert(new_pos);
+                            let child = node.insert(board[x as usize][y as usize]);
+                            iter_node(child, board, Point::from(new_pos), path);
+                            path.remove(&new_pos);
+                        }
+                    }
+                }
+            }
+
+            let mut root = TrieTree::new();
+            let mut path = HashSet::new();
+            for i in 0..board.len() {
+                for j in 0..board[i].len() {
+                    let pos:i32 = Point(i as i16, j as i16).into();
+                    path.insert(pos);
+                    let node = root.insert(board[i][j]);
+                    iter_node(node, &board, Point::from(pos), &mut path);
+                    path.remove(&pos);
+                }
+            }
+            
+            let result = true;
+
+            let mut node  = &mut root;
+            for c in word.chars() {
+                if let Some(child) = node.get_child(c) {
+                    node = child;
+                }else{
+                    return false;
+                }
+            }
+
+            result
+        }
+    }
+
+    //imp Into function from Vec<&str> to Vec<Char>
+    fn from(item: Vec<&str>) -> Vec<char> {
+        let mut result = Vec::new();
+        item.into_iter().for_each(|s| {
+            result.push(s.clone().chars().nth(0).unwrap());
+        });
+        result
+    }
+
+    let graph = Vec::from_iter([
+            Vec::from_iter(['a', 'b', 'c', 'd', 'e', 'f',]),
+            Vec::from_iter(['a', 'b', 'c', 'd', 'e', 'f',])]);
+    println!("{}", Solution::exist(graph.clone(), String::from("abcddef")));
+    println!("{}", Solution::exist(graph.clone(), String::from("aabbccddeed")));
+    println!("{}", Solution::exist(graph.clone(), String::from("aabbccddeeffe")));
+    let graph : Vec<Vec<char>> = Vec::from_iter([
+        from(["A","B","C","E", "F", "G"].to_vec()),
+        from(["S","F","C","S", "W", "Z"].to_vec()),
+        from(["A","D","E","E", "R", "T"].to_vec()), 
+        //from(["A","B","C","E", "F", "G"].to_vec()),
+        //from(["S","F","C","S", "W", "Z"].to_vec()),
+        from(["A","D","E","E", "R", "T"].to_vec())]);
+    println!("{}", Solution::exist(graph.clone(), String::from("ABCCSEFGZWRT")));
+
+
+}
+
+
+fn leetcode_79_2() {
+
+    impl Solution {
+        pub fn exist(board: Vec<Vec<char>>, word: String) -> bool {
+            struct Point(i16, i16);
+            // Implement From function for Point with i32 as parameter
+            impl From<i32> for Point {
+                fn from(item: i32) -> Self {
+                    Point((item/10000) as i16, (item%10000) as i16)
+                }
+            }
+            //Implement Into function for Point with i32 as parameter
+            impl Into<i32> for Point {
+                fn into(self) -> i32 {
+                    (self.0 as i32)*10000 + self.1 as i32
+                }
+            }
+
+            fn match_it(board: &Vec<Vec<char>>, word: &String, index:Point, path: &mut HashSet<i32>) -> bool {
+                
+            }
+        }
+    }
+}
+
 fn main() {
     /* 
     println!("Hello, world!");
@@ -260,5 +427,6 @@ fn main() {
     //primitives();
     //test_77();
     //test_78();
-    custom_types();
+    //custom_types();
+    leetcode_79();
 }
