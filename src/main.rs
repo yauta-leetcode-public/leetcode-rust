@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{collections::{HashMap, HashSet}, io, mem, ops::Add};
+use std::{collections::{HashMap, HashSet}, io, mem, ops::Add, sync::Arc};
 
 struct Solution{
 
@@ -397,10 +397,49 @@ fn leetcode_79_2() {
                     (self.0 as i32)*10000 + self.1 as i32
                 }
             }
-
-            fn match_it(board: &Vec<Vec<char>>, word: &String, index:Point, path: &mut HashSet<i32>) -> bool {
-                
+            //Implement Clone function for Point
+            impl Clone for Point {
+                fn clone(&self) -> Point {
+                    Point(self.0, self.1)
+                }
             }
+
+            fn match_it(board: &Vec<Vec<char>>, word: &String, index:usize, position: Point, path: &mut HashSet<i32>) -> bool {
+
+                if board[position.0 as usize][position.1 as usize] != word.chars().nth(index).unwrap() {
+                    return false;
+                }
+
+                let pos: i32 = position.clone().into();
+                if path.contains(&pos) {
+                    return false;
+                }
+                path.insert(pos);
+                let offsets = [Point(-1, 0), Point(1, 0), Point(0, -1), Point(0, 1)];
+                for offset in offsets {
+                    let (x, y) = (offset.0, offset.1);
+                    if x>= 0 && x < board.len() as i16 && y >= 0 && y < board[0].len() as i16 {
+                        let new_pos = Point(x, y) + position;
+                        if !path.contains(&new_pos.into()) {
+                            if match_it(board, word, index+1, new_pos, path) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                path.remove(&pos);
+                false
+            }
+
+            for i in 0..board.len() {
+                for j in 0..board[i].len() {
+                    let mut path = HashSet::new();
+                    if match_it(&board, &word, 0, Point(i as i16, j as i16), &mut path) {
+                        return true;
+                    }
+                }
+            }
+            false
         }
     }
 }
@@ -428,5 +467,5 @@ fn main() {
     //test_77();
     //test_78();
     //custom_types();
-    leetcode_79();
+    leetcode_79_2();
 }
