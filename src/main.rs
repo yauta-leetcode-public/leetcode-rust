@@ -239,9 +239,8 @@ fn custom_types() {
 }
 
 fn leetcode_79(){
-
     impl Solution {
-        pub fn exist(board: Vec<Vec<char>>, word: String) -> bool {
+        pub fn exist0(board: Vec<Vec<char>>, word: String) -> bool {
 
             struct Point(i16, i16);
 
@@ -381,7 +380,6 @@ fn leetcode_79(){
 
 
 fn leetcode_79_2() {
-
     impl Solution {
         pub fn exist(board: Vec<Vec<char>>, word: String) -> bool {
             struct Point(i16, i16);
@@ -403,8 +401,20 @@ fn leetcode_79_2() {
                     Point(self.0, self.1)
                 }
             }
+            //Implement Add function for two points
+            impl Add for Point {
+                type Output = Point;
+
+                fn add(self, other: Point) -> Point {
+                    Point(self.0 + other.0, self.1 + other.1)
+                }
+            }
 
             fn match_it(board: &Vec<Vec<char>>, word: &String, index:usize, position: Point, path: &mut HashSet<i32>) -> bool {
+
+                if index >= word.len() {
+                    return true;
+                }
 
                 if board[position.0 as usize][position.1 as usize] != word.chars().nth(index).unwrap() {
                     return false;
@@ -415,12 +425,16 @@ fn leetcode_79_2() {
                     return false;
                 }
                 path.insert(pos);
+
+                if index == word.len()-1 {
+                    return true;
+                }
                 let offsets = [Point(-1, 0), Point(1, 0), Point(0, -1), Point(0, 1)];
                 for offset in offsets {
-                    let (x, y) = (offset.0, offset.1);
+                    let mut new_pos = offset + position.clone();
+                    let (x, y) = (new_pos.0, new_pos.1);
                     if x>= 0 && x < board.len() as i16 && y >= 0 && y < board[0].len() as i16 {
-                        let new_pos = Point(x, y) + position;
-                        if !path.contains(&new_pos.into()) {
+                        if !path.contains(&new_pos.clone().into()) {
                             if match_it(board, word, index+1, new_pos, path) {
                                 return true;
                             }
@@ -442,6 +456,30 @@ fn leetcode_79_2() {
             false
         }
     }
+
+    //imp Into function from Vec<&str> to Vec<Char>
+    fn from(item: Vec<&str>) -> Vec<char> {
+        let mut result = Vec::new();
+        item.into_iter().for_each(|s| {
+            result.push(s.clone().chars().nth(0).unwrap());
+        });
+        result
+    }
+
+    let graph = Vec::from_iter([
+            Vec::from_iter(['a', 'b', 'c', 'd', 'e', 'f',]),
+            Vec::from_iter(['a', 'b', 'c', 'd', 'e', 'f',])]);
+    println!("{}", Solution::exist(graph.clone(), String::from("abcddef")));
+    println!("{}", Solution::exist(graph.clone(), String::from("aabbccddeed")));
+    println!("{}", Solution::exist(graph.clone(), String::from("aabbccddeeffe")));
+    let graph : Vec<Vec<char>> = Vec::from_iter([
+        from(["A","B","C","E", "F", "G"].to_vec()),
+        from(["S","F","C","S", "W", "Z"].to_vec()),
+        from(["A","D","E","E", "R", "T"].to_vec()), 
+        from(["A","B","C","E", "F", "G"].to_vec()),
+        from(["S","F","C","S", "W", "Z"].to_vec()),
+        from(["A","D","E","E", "R", "T"].to_vec())]);
+    println!("{}", Solution::exist(graph.clone(), String::from("ABCCSEFGZWRTGZTR")));
 }
 
 fn main() {
